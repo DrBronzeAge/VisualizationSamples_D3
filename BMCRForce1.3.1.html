@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <title>Tear the Discipline Apart</title>
+  <style>
+
+
+      
+      #tooltip {
+        position: absolute;
+        width: 200px;
+        height: auto;
+        padding: 10px;
+        background-color: AntiqueWhite;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+      }
+      
+      #tooltip.hidden {
+        display: none;
+      }
+      
+      #tooltip p {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 26px;
+        line-height: 25px;
+      }
+
+  .node {
+    stroke: #fff;
+    stroke-width: 1.5px;
+  }
+
+  .link {
+    stroke: #999;
+    stroke-opacity: .6;
+  }
+
+  .node text {
+  pointer-events: none;
+  font: 10px sans-serif;
+}
+
+  </style>
+<body>
+<div id="tooltip" class="hidden">
+      <p><span id="value">100</span></p>
+    </div>
+<script type="text/javascript" src="d3.js"></script>
+<script>
+
+var width = 1920,
+    height = 1000,
+    graph,
+    rScale,
+    linkScale;
+
+var BondsLoosed=0;
+
+console.log('We are armed and operational');
+
+//var color =  d3.scale.category20();
+var color = function(d){
+  var col=["#6495ED","#00cc00","#ffff66","#660033"];
+  return(col[d-1]);
+  //   var color='cornflowerBlue';
+   // blue=#6495ED
+//   green=#00cc00
+//   yellow=#ffff66
+//   purple=#660033
+// }
+}
+
+
+var force = d3.layout.force()
+    .charge(-500)
+    .friction(0.9)
+    .gravity(0.3)
+    .linkDistance(30)
+    .chargeDistance(width/3)
+    .size([width, height]);
+
+
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+d3.json("force3Big.json", function(error, json) {
+  if (error) throw error;
+  graph=json;
+
+  rScale = d3.scale.linear()
+    //.domain([0, d3.max(graph.nodes, function(d) { return d.value; })])
+    .domain([0,1000])
+    .range([7, 45]);
+
+  linkScale=d3.scale.linear()
+    .domain([0, d3.max(graph.edges, function(d) {return d.value; })])
+    .range([.1,.6]);
+
+  updateGraph(graph.nodes,graph.edges);
+});
+
+function updateGraph(GNodes,GEdges){
+
+var lookup={};
+for (i=0;i<GNodes.length;i++){
+  lookup[GNodes[i].id]=i;
+}
+var Edges=[];
+  for(i=0;i<GEdges.length;i++){
+    var ee=GEdges[i];
+    if (lookup.hasOwnProperty(ee.src) ){
+      if (lookup.hasOwnProperty(ee.trg) ){
+        Edges.push({'src':ee.src,'trg':ee.trg,'source':lookup[ee.src], 'target':lookup[ee.trg], 'value':ee.value});
+
+      }
+    }
+  }
+graph.nodes=GNodes;
+graph.edges=Edges;
+
+var forceScale=d3.scale.linear()
+    .domain([0, d3.max(graph.nodes, function(d) { return d.value; })])
+    .range([300, 3000]);
+
+force.charge(function(d){return -forceScale(d.value);})
+force.linkStrength(function(d){return linkScale(d.value)})
+
+  force
+      .nodes(graph.nodes)
+      .links(graph.edges)
+      .start();
+
+
+  var link = svg.selectAll(".link")
+      .data(graph.edges);
+
+      link.enter().append("line")
+      .attr("class", "link")
+      .style("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+      link.exit()
+        .transition(1000)
+        .attr("y1",height)
+        .attr("y2", height)
+        .style('stroke', 'red')
+        .remove();
+
+ var node = svg.selectAll(".node")
+      .data(graph.nodes);
+
+    node.enter().append("circle")
+      .attr("class", "node")
+      .attr("r", function(d) {return rScale(d.value); })
+      .style("fill", function(d) { return color(d.label); })
+
+      .on("dblclick", function(d) {removeNode(d.id); } )
+      .on("mouseover", function(d) {
+
+          //Get this bar's x/y values, then augment for the tooltip
+          var xPosition = parseFloat(d3.select(this).attr("cx")) +40 ;
+          var yPosition = parseFloat(d3.select(this).attr("cy")) -40 ;
+         // alert("mouseover called: "+xPosition+'--'+yPosition);
+          //Update the tooltip position and value
+          d3.select("#tooltip")
+            .style("left", xPosition + "px")
+            .style("top", yPosition + "px")           
+            .select("#value")
+            .text(d.id);
+         
+          //Show the tooltip
+          d3.select("#tooltip").classed("hidden", false);
+
+         })
+         .on("mouseout", function() {
+         
+          //Hide the tooltip
+          d3.select("#tooltip").classed("hidden", true);
+          
+         })
+         .call(force.drag);
+
+    node.exit()
+        .transition(1000)
+        .attr("r",800)
+        .style("opacity",0)
+        .remove();
+
+    node.append("text")
+      .attr("dx", 12)
+      .attr("dy", ".35em")
+      .text(function(d) { return d.name });
+    
+    // var TXT=svg.selectAll("text")
+    //     .data(node)
+    //     .text(function(d) {return d.id;})
+    //     .attr('x', function(d){return d.cx;})
+    //     .attr('y', function(d){return d.cy;});
+        // .text(d3.select(this).id)
+        // .attr("x", d3.select(this).attr('cx'))
+        // .attr("y", d3.select(this).attr('cy'));
+
+   
+  // node.append("title")
+  //     .text(function(d) { return d.id; });
+
+  force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node.attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+  });
+
+function removeNode(nodeID){
+  //alert('weve removed :'+nodeID);
+GNodes=[];
+for (i=0;i<graph.nodes.length;i++){
+  if (graph.nodes[i].id != nodeID){GNodes.push(graph.nodes[i]);}
+  
+}
+updateGraph(GNodes,graph.edges);
+}
+
+
+};
+
+</script>
