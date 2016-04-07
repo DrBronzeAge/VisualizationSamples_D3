@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+ #tooltip {
+        position: absolute;
+        width: 400px;
+        height: auto;
+        padding: 10px;
+        background-color: AntiqueWhite;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+      }
+      
+      #tooltip.hidden {
+        display: none;
+      }
+      
+      #tooltip p {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 36px;
+        line-height: 35px;
+      }
+text {
+  font: 10px sans-serif;
+}
+
+</style>
+
+<body>
+<div id="tooltip" class="hidden">
+      <p><span id="value">100</span></p>
+    </div>
+<script src="d3.js"></script>
+
+
+<div style='Width: 750px;text-align:center'>
+<h1>Find Your Audience</h1>
+<h2 id='BubbleChartStatus'>Sized By Simple Frequency</h2>
+<h2>Click to Change</h2>
+</div>
+
+<script>
+var diameter = 750; //max size of the bubbles
+var v=1;
+var bubData;
+
+var color = function(d){
+  var col=["#6495ED","#00cc00","#ff9900","#660033"];
+  return(col[d-1]); 
+  }//color category
+
+var pack = d3.layout.pack()
+    .sort(function(a,b){return a.term-b.term;})
+    .size([diameter, diameter])
+    .value(function(d) {  
+        return getVal(d,v); 
+      })
+    .padding(1.5);
+
+var svg = d3.select("body")
+    .append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+    .attr("class", "pack")
+    .append("g");
+
+
+function getVal(d,v){
+      //alert("GetVal called "+v)
+      if (v==1){
+        d3.select('#BubbleChartStatus').text('Sized By Simple Frequency');
+        return d.FreqValue;}
+      if (v== -1) {
+        d3.select('#BubbleChartStatus').text('Sized By Network Centrality');
+        return d.Powvalue;}
+      
+      //UpdateBubbles(bubData);
+      }
+    // .attr("transform", "translate(2, 2)");
+
+//so what do we want-- two data sets, both prepped, and switch them on click
+
+var power,Freq,nodes;
+
+bubData={"bubbly": [{"PercRank": "top quartile", "term": "Archaic", "label": 3, "FreqValue": 82, "Powvalue": 2705}, {"PercRank": "top 5 percent", "term": "Antiquity", "label": 4, "FreqValue": 473, "Powvalue": 31720}, {"PercRank": "bottom quartile", "term": "Poetry", "label": 3, "FreqValue": 132, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Language", "label": 4, "FreqValue": 101, "Powvalue": 4175}, {"PercRank": "top 5 percent", "term": "Egypt", "label": 3, "FreqValue": 113, "Powvalue": 4449}, {"PercRank": "top quartile", "term": "Storia", "label": 1, "FreqValue": 77, "Powvalue": 953}, {"PercRank": "top quartile", "term": "Cicero", "label": 4, "FreqValue": 105, "Powvalue": 2579}, {"PercRank": "top 5 percent", "term": "Age", "label": 2, "FreqValue": 227, "Powvalue": 11983}, {"PercRank": "top 5 percent", "term": "Proceedings", "label": 1, "FreqValue": 82, "Powvalue": 3080}, {"PercRank": "bottom quartile", "term": "Volume", "label": 3, "FreqValue": 149, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Christianity", "label": 4, "FreqValue": 170, "Powvalue": 8163}, {"PercRank": "top 5 percent", "term": "Ancient", "label": 4, "FreqValue": 1000, "Powvalue": 64236}, {"PercRank": "top quartile", "term": "Euripide", "label": 2, "FreqValue": 112, "Powvalue": 2414}, {"PercRank": "bottom quartile", "term": "Roma", "label": 3, "FreqValue": 91, "Powvalue": 0}, {"PercRank": "bottom quartile", "term": "Latin", "label": 3, "FreqValue": 247, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Late", "label": 1, "FreqValue": 259, "Powvalue": 14358}, {"PercRank": "top quartile", "term": "Narrative", "label": 1, "FreqValue": 79, "Powvalue": 2628}, {"PercRank": "top 5 percent", "term": "Perspectives", "label": 3, "FreqValue": 81, "Powvalue": 3233}, {"PercRank": "top quartile", "term": "Geschichte", "label": 1, "FreqValue": 76, "Powvalue": 963}, {"PercRank": "top 5 percent", "term": "Republic", "label": 4, "FreqValue": 95, "Powvalue": 3922}, {"PercRank": "bottom quartile", "term": "R\u00f6mischen", "label": 3, "FreqValue": 101, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Time", "label": 4, "FreqValue": 101, "Powvalue": 3518}, {"PercRank": "bottom quartile", "term": "Antiker", "label": 3, "FreqValue": 174, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Imperial", "label": 4, "FreqValue": 93, "Powvalue": 3526}, {"PercRank": "top 5 percent", "term": "Selection", "label": 4, "FreqValue": 102, "Powvalue": 3032}, {"PercRank": "top 5 percent", "term": "New", "label": 4, "FreqValue": 157, "Powvalue": 8320}, {"PercRank": "top 5 percent", "term": "Arte", "label": 4, "FreqValue": 206, "Powvalue": 10817}, {"PercRank": "top 5 percent", "term": "Contexts", "label": 2, "FreqValue": 91, "Powvalue": 4101}, {"PercRank": "top 5 percent", "term": "Book", "label": 1, "FreqValue": 174, "Powvalue": 8358}, {"PercRank": "top 5 percent", "term": "Religions", "label": 4, "FreqValue": 163, "Powvalue": 7819}, {"PercRank": "top quartile", "term": "Beyond", "label": 2, "FreqValue": 76, "Powvalue": 2768}, {"PercRank": "top quartile", "term": "Atti", "label": 2, "FreqValue": 112, "Powvalue": 1679}, {"PercRank": "top 5 percent", "term": "Life", "label": 4, "FreqValue": 133, "Powvalue": 6174}, {"PercRank": "top 5 percent", "term": "Alexander", "label": 1, "FreqValue": 108, "Powvalue": 3807}, {"PercRank": "top 5 percent", "term": "Translation", "label": 4, "FreqValue": 114, "Powvalue": 4890}, {"PercRank": "bottom quartile", "term": "Romaine", "label": 3, "FreqValue": 88, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Companion", "label": 4, "FreqValue": 150, "Powvalue": 5212}, {"PercRank": "bottom quartile", "term": "History", "label": 3, "FreqValue": 421, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Archaeological", "label": 3, "FreqValue": 201, "Powvalue": 9615}, {"PercRank": "bottom quartile", "term": "Roman", "label": 3, "FreqValue": 970, "Powvalue": 0}, {"PercRank": "bottom quartile", "term": "Hellenistic", "label": 3, "FreqValue": 129, "Powvalue": 0}, {"PercRank": "top quartile", "term": "Bronze", "label": 4, "FreqValue": 79, "Powvalue": 2495}, {"PercRank": "top 5 percent", "term": "Ovid", "label": 2, "FreqValue": 130, "Powvalue": 3335}, {"PercRank": "top 5 percent", "term": "Les", "label": 4, "FreqValue": 167, "Powvalue": 3797}, {"PercRank": "bottom quartile", "term": "Antica", "label": 3, "FreqValue": 80, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Centuries", "label": 1, "FreqValue": 109, "Powvalue": 4705}, {"PercRank": "top 5 percent", "term": "Texts", "label": 4, "FreqValue": 201, "Powvalue": 10815}, {"PercRank": "bottom quartile", "term": "Poetic", "label": 3, "FreqValue": 85, "Powvalue": 0}, {"PercRank": "top quartile", "term": "Seneca", "label": 4, "FreqValue": 84, "Powvalue": 1299}, {"PercRank": "bottom quartile", "term": "Culture", "label": 3, "FreqValue": 262, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Interpretation", "label": 4, "FreqValue": 88, "Powvalue": 3502}, {"PercRank": "bottom quartile", "term": "Commentaries", "label": 3, "FreqValue": 191, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Social", "label": 4, "FreqValue": 92, "Powvalue": 5306}, {"PercRank": "top quartile", "term": "Iii", "label": 4, "FreqValue": 100, "Powvalue": 2834}, {"PercRank": "top 5 percent", "term": "Tradition", "label": 4, "FreqValue": 163, "Powvalue": 8835}, {"PercRank": "top 5 percent", "term": "Early", "label": 4, "FreqValue": 230, "Powvalue": 13043}, {"PercRank": "top 5 percent", "term": "Image", "label": 2, "FreqValue": 79, "Powvalue": 3283}, {"PercRank": "top 5 percent", "term": "Gods", "label": 2, "FreqValue": 75, "Powvalue": 3060}, {"PercRank": "top 5 percent", "term": "Essays", "label": 4, "FreqValue": 153, "Powvalue": 6891}, {"PercRank": "top quartile", "term": "Ethics", "label": 4, "FreqValue": 79, "Powvalue": 2363}, {"PercRank": "top 5 percent", "term": "Identity", "label": 2, "FreqValue": 102, "Powvalue": 4529}, {"PercRank": "top 5 percent", "term": "Modern", "label": 4, "FreqValue": 141, "Powvalue": 6449}, {"PercRank": "bottom quartile", "term": "Kommentar", "label": 3, "FreqValue": 85, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "International", "label": 1, "FreqValue": 75, "Powvalue": 3095}, {"PercRank": "top 5 percent", "term": "Power", "label": 1, "FreqValue": 89, "Powvalue": 3659}, {"PercRank": "bottom quartile", "term": "Platonisms", "label": 3, "FreqValue": 187, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Myths", "label": 2, "FreqValue": 134, "Powvalue": 6622}, {"PercRank": "top 5 percent", "term": "Mediterranean", "label": 3, "FreqValue": 90, "Powvalue": 3360}, {"PercRank": "top 5 percent", "term": "Aristotle", "label": 4, "FreqValue": 195, "Powvalue": 7054}, {"PercRank": "bottom quartile", "term": "Griechischen", "label": 3, "FreqValue": 84, "Powvalue": 0}, {"PercRank": "bottom quartile", "term": "Greece", "label": 3, "FreqValue": 286, "Powvalue": 0}, {"PercRank": "bottom quartile", "term": "Classical", "label": 3, "FreqValue": 429, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Athens", "label": 2, "FreqValue": 200, "Powvalue": 11328}, {"PercRank": "top 5 percent", "term": "Plato", "label": 4, "FreqValue": 280, "Powvalue": 14295}, {"PercRank": "top 5 percent", "term": "Thought", "label": 4, "FreqValue": 80, "Powvalue": 3008}, {"PercRank": "top 5 percent", "term": "East", "label": 3, "FreqValue": 111, "Powvalue": 5529}, {"PercRank": "top 5 percent", "term": "Literatur", "label": 2, "FreqValue": 242, "Powvalue": 12141}, {"PercRank": "bottom quartile", "term": "Society", "label": 3, "FreqValue": 113, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Rome", "label": 4, "FreqValue": 382, "Powvalue": 14515}, {"PercRank": "top 5 percent", "term": "Homeric", "label": 2, "FreqValue": 218, "Powvalue": 10028}, {"PercRank": "bottom quartile", "term": "Political", "label": 3, "FreqValue": 228, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Tragedy", "label": 2, "FreqValue": 109, "Powvalue": 3944}, {"PercRank": "bottom quartile", "term": "Philosophie", "label": 3, "FreqValue": 279, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Empire", "label": 1, "FreqValue": 248, "Powvalue": 13366}, {"PercRank": "top 5 percent", "term": "Reading", "label": 4, "FreqValue": 134, "Powvalue": 6647}, {"PercRank": "bottom quartile", "term": "Women", "label": 3, "FreqValue": 136, "Powvalue": 0}, {"PercRank": "bottom quartile", "term": "Reader", "label": 3, "FreqValue": 107, "Powvalue": 0}, {"PercRank": "bottom quartile", "term": "Greek", "label": 3, "FreqValue": 810, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "City", "label": 3, "FreqValue": 112, "Powvalue": 4691}, {"PercRank": "top 5 percent", "term": "World", "label": 1, "FreqValue": 375, "Powvalue": 21353}, {"PercRank": "bottom quartile", "term": "Athenian", "label": 3, "FreqValue": 106, "Powvalue": 0}, {"PercRank": "top 5 percent", "term": "Introduction", "label": 4, "FreqValue": 109, "Powvalue": 4758}, {"PercRank": "top 5 percent", "term": "Studies", "label": 4, "FreqValue": 493, "Powvalue": 31885}, {"PercRank": "top 5 percent", "term": "Laws", "label": 4, "FreqValue": 82, "Powvalue": 3268}, {"PercRank": "top 5 percent", "term": "Rhetoric", "label": 4, "FreqValue": 107, "Powvalue": 4469}, {"PercRank": "top quartile", "term": "Form", "label": 4, "FreqValue": 86, "Powvalue": 2785}, {"PercRank": "top 5 percent", "term": "Byzantine", "label": 1, "FreqValue": 76, "Powvalue": 3568}, {"PercRank": "top quartile", "term": "Socrates", "label": 4, "FreqValue": 88, "Powvalue": 2281}]};
+
+
+UpdateBubbles(bubData);
+    
+
+    function UpdateBubbles(bubData){
+
+     
+
+    
+    nodes = pack.nodes({children:bubData.bubbly}).filter(function(d) { return !d.children; });
+  // alert('UpdateBubbles called '+nodes[0].value);   
+    // d3.select("#JSHead")
+    //         .style("left", diameter/2-100+ "px")           
+    //         .select("#value")
+    //         .text(function(){
+    //           if (v==-1){return "Scaled By Centrality";}
+    //           if (v==1){return "Scaled By Frequency";}
+    //         });
+    //setup the chart
+    var node = svg.selectAll("g.node").data(nodes);
+
+    var nodeEnter=node.enter();//.append("g")
+      //.attr("class", "leaf node")
+      //.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+   // svg.on('click', function(){UpdateBubbles(v,data);});
+   node.append("title")
+      .text(function(d) { return d.term; } );
+    //create the bubbles
+   nodeEnter.append("circle")
+        .attr("r", function(d) { return d.r; })
+        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+        .style("fill", function(d) { return color(d.label); })
+         .on("mouseover", function(d) {
+
+          
+          var xPosition = d.x +40 ;
+          var yPosition = d.y -40 ;
+        
+          d3.select("#tooltip")
+            .style("left", xPosition + "px")
+            .style("top", yPosition + "px")           
+            .select("#value")
+            .text(d.term+": "+d.FreqValue+" instances, it is in the "+d.PercRank +" for centrality");
+         
+          //Show the tooltip
+          d3.select("#tooltip").classed("hidden", false);
+
+         })
+         .on("mouseout", function() {
+         
+          //Hide the tooltip
+          d3.select("#tooltip").classed("hidden", true);
+          
+         });
+
+    nodeEnter.append('text')
+      
+      
+      .text(function(d) { return d.term.substring(0, d.r / 3); })
+      .style("text-anchor", "middle")
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+      .attr("font-family", "sans-serif")
+         .attr("font-size", "11px")
+         .attr("fill", "white");
+
+// .text(function(d){return d.term;})
+
+//  .attr("dy", ".3em")
+      
+     
+
+     //d3.select("#JShead")
+        svg.on("click", function() {
+           //switch value sets
+           v*=-1
+
+    pack = d3.layout.pack()
+    .sort(function(a,b){return a.term-b.term;})
+    .size([diameter, diameter])
+    .value(function(d) {  
+        return getVal(d,v); 
+      })
+    .padding(1.5);
+   
+    nodes = pack.nodes({children:bubData.bubbly}).filter(function(d) { return !d.children; });
+
+      //for(i=0; i<nodes.length; i++){nodes[i].value=getVal(nodes[i],v);}
+          
+         
+      //     pack.value=(function(d) {
+      // //SYMBOLIZING BY NEW VALUE
+      //   return getVal(d,v)
+//       // }) 
+// alert("click called" +nodes[0].value);
+// // node.data(pack.nodes).selectAll("g")
+// //              .data(nodes)
+// alert("click called" +nodes[0].value);
+
+ 
+//   alert("click called" +nodes[0].value);   
+        node = svg.selectAll("g.node").data(nodes);
+
+        nodeEnter=node.enter();
+           
+          node.transition()
+            .duration(4500)
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })//.attr('fill','red');
+
+          d3.selectAll("circle")
+            .transition()
+            .duration(4500)  
+            .attr("r", function(d) { return d.r; })
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+            .style("fill", function(d) { return color(d.label); });
+
+            d3.selectAll('text')
+            .transition()
+            .duration(4500)
+            .text(function(d) { return d.term.substring(0, d.r / 3); })
+            .style("text-anchor", "middle")
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "11px")
+            .attr("fill", "white");
+                    // svg.selectAll("circle")
+          // .data(nodes)
+          // .enter
+
+
+
+        });
+};
+
+
+
+</script>
